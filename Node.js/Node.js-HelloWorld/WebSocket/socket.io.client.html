@@ -1,0 +1,27 @@
+<!-- 
+sockt.io.client.html
+author - star114
+Echo client
+-->
+<html>
+<head>
+</head>
+<script src="http://localhost:8000/socket.io/socket.io.js"></script>
+<script>
+	var socket;
+	window.onload = function() {
+		socket = io.connect('http://localhost:8000');
+		socket.on('msg_by_server', function(data) {
+			alert(data);
+		});
+	};
+	
+	var sendMessage = function() {
+		socket.emit('msg', 'msg from client');
+	};
+</script>
+
+<body>
+<button onclick = "sendMessage();">MessageSend</button>
+</body>
+</html>

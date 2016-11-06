@@ -1,0 +1,24 @@
+{
+  "name": "Node.js-HelloWorld",
+  "version": "0.1.0",
+  "description": "Node.js-HelloWorld",
+  "main": "hello-world-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/star114/Node.js-HelloWorld"
+  },
+  "keywords": [
+    "node.js",
+    "eclipse",
+    "nodeclipse"
+  ],
+  "author": "star114",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "connect": "*"
+  }
+}

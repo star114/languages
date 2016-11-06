@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Contect-Type" content="text/html" charset="UTF-8">
+<title>Chatting</title>
+	<script type="text/javascript" src="http://localhost:3000/js/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="http://localhost:3000/js/socket.io.js"></script>
+	<script>
+		var socket = io.connect('http://localhost:3000');
+		
+		function viewRoomList(data){
+			console.log(data);
+			$("#roomlist li").remove();
+			$("#room").show();
+			$("#chatroom").hide();
+			$("#roommake").show();
+			
+			for (var i =0 ; i < data.length ; i++) {
+				if (data[i].myroom) {			
+					$("#room").hide();
+					$("#roommake").hide();
+					$("#chatroom").show();
+					$("#chatroom #roomname").text("방이름 : " + data[i].name);
+					$("#chatroom #count").text("참여자수 : " + data[i].count);
+					$("#chatroom #nickname").text("닉네임 : " + nickname);
+					break;
+				} else {
+					$("#roomlist").append("<li '>방이름 :" + data[i].name + 
+					", 참여자수 :" + data[i].count + 
+					", 닉네임: <input type= 'text' data-roomname=data[i].name> <input type = 'button' value = '입장하기' data-roomname=data[i].name> </li>");
+					//$("#roomlist li input[type=button]").attr("data-roomname", data[i].name);
+					//$("#roomlist li input[type=text]").attr("data-roomname", data[i].name);
+				}
+			}
+			
+			if (data.length < 1) {
+				$("#roomlist").append("<li>생성된 방이 없습니다.</li>");
+			} else {
+				$("#roomlist li input[type=button]").click(function(event) {
+					//var data = 
+					//{"roomname" : event.target.attr("data-roomname"),
+					// "nickname" : event.target.innertext };
+					//socket.emit('roommake', data);
+					//nickname = event.target.innertext;
+				});
+			} 
+		}	
+		function getRoomList(){
+			$.ajax({
+				type: "get",
+				dataType: "json",
+				url: "http://localhost:3000/roomlist",
+				success: function(data) {
+					console.log(data);
+					roomlist = [];
+					var sessionid = data['clientid'];
+					var nickname = data['nickname'];
+					var roomnames = data['roomname'];
+					var roomdata = data['roomdata'];
+			
+					for (var key in roomdata) {
+						//console.log("key : " + key);
+						//console.log("roomdata[key] :" + roomdata[key]);
+						for ( var names in roomnames )
+						{
+							var myroom = false;
+							if (names === key)
+							{		
+								var length = 0;
+								
+								for (var sid in roomdata[key]) {
+									//console.log("sid : " + sid);
+									//console.log("sessionid : " + socket.io.engine.id);
+							
+									if (sid === socket.io.engine.id) {
+										myroom = true;
+									}
+									length++;
+								}							
+								roomlist.push({"name":names, count:length, myroom:myroom});
+							}
+						}
+					}				
+					viewRoomList(roomlist);
+				},
+				error: function(res) {
+					console.log("Error on GetRoomList()");
+				}
+			});	
+		}
+		
+		
+		$(document).ready(function(){
+			//방 만들기
+			$("#room_make").click(function() {
+				var data = 
+				{"roomname" : $("#roomname").val(),
+				 "nickname" : $("#nickname").val() };
+				socket.emit('roommake', data);
+				$("#roomname").val("");
+				nickname = $("#nickname").val();
+			});
+			
+			// 입장시 화면처리
+			socket.on('intro', function(data) {
+				$("#chatroom textarea").val($("#chatroom textarea").val() + '(' + data + ') 님이 입장하셨습니다.\n');
+				$("#chatroom textarea").scrollTop($("#chatroom textarea")[0].scrollHeight);
+			});
+			
+			//*.$("#chatroom textarea").scrollTop($("#chatroom textarea")[0].scrollHeight);
+			// 화면스크롤을 항상 아래로 내리
+			
+			// 채팅창에서 메세지 보내기
+			$("#chatroom div input").keypress(function(e) {
+				if(e.keyCode == 13) {
+					socket.emit('message', {"msg":$("#chatroom div input").val()});
+					$("#chatroom div input").val("");
+				}
+			});
+			
+			//메세지 처리
+			socket.on('message_send', function(data) {
+				$("#chatroom textarea").val($("#chatroom textarea").val() + '[' + data.from + '] : ' + data.msg + '\n');
+				$("#chatroom textarea").scrollTop($("#chatroom textarea")[0].scrollHeight);
+			});
+			
+			//방 나가
+			$("#room_exit").click(function() {
+				socket.emit('leave', null);
+			});
+			
+			// 퇴장화면 처리
+			socket.on('message_send_disconnect', function(data){
+				console.log("DISCONNECT");
+				
+				$("#chatroom textarea").val($("#chatroom textarea").val() + '(' + data.from + ') 님이 퇴장하셨습니다.\n');
+				$("#chatroom textarea").scrollTop($("#chatroom textarea")[0].scrollHeight);
+				
+				//console.log(data['clientid']);
+				if (socket.io.engine.id == data['clientid']) {
+					$("#chatroom textarea").val('');
+				}
+				else {
+					$("#chatroom #count").text("참여자수 : " + (data.count-1));
+				}
+			});
+			
+			// 퇴장 후 다시 채팅방 탐색
+			socket.on('room_research', function(data){
+				console.log('room_research!!\n');
+				getRoomList();
+			});
+			
+						
+			socket.on('roomlist', function(data){
+				console.log(data);
+				roomlist = [];
+				var nickname = data['nickname'];
+				var roomnames = data['roomname'];
+				var roomdata = data['roomdata'];
+			
+				for (var key in roomdata) {
+					//console.log("key : " + key);
+					//console.log("roomdata[key] :" + roomdata[key]);
+					for ( var names in roomnames )
+					{
+						//console.log("roomname : " + names);
+					
+						var myroom = false;
+						if (names === key)
+						{
+							//console.log("same room : " + names);
+					
+							var length = 0;
+							for (var sid in roomdata[key]) {
+								console.log("sid : " + sid);
+								console.log("sessionid : " + socket.io.engine.id);
+						
+								if (sid === socket.io.engine.id) {
+									myroom = true;
+								}
+								length++;
+							}						
+							roomlist.push({"name":names, count:length, myroom:myroom});
+						}
+					}
+				}
+						
+				viewRoomList(roomlist);
+			});	
+		})	
+
+	</script>
+<link rel="stylesheet" type="text/css" href="http://localhost:3000/stylesheets/style.css">
+</head>
+<body>
+	<h1>Make a Room</h1>
+	<fieldset id="roommake">
+		<legend>Make a room</legend>
+		방이름 : <input id="roomname" type="text"><br>
+		닉네임 : <input id="nickname" type="text"><br>
+		<input id="room_make" type="button" value="방만들기">
+	</fieldset>
+	<fieldset id="room">
+		<legend>Room List</legend>
+		<div id="roomlist">  <script>getRoomList()</script> </div>
+	</fieldset>
+	<fieldset id="chatroom">
+		<legend id="roomname"></legend>
+		<legend id="count"></legend>
+		<legend id="nickname"></legend>
+		<textarea cols=50 rows=20 readonly></textarea>
+		<div>
+		<input type="text" size="50">
+		</div>
+		<div>
+		<input id="room_exit" type="button" value="나가기">
+		</div>
+	</fieldset>
+</body>
+</html>

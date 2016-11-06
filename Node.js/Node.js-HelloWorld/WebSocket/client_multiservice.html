@@ -1,0 +1,15 @@
+
+	<script src="http://localhost:8000/socket.io/socket.io.js"></script>
+	<script>
+		var chat = io.connect('http://localhost:8000/chat');
+		var news = io.connect('http://localhost:8000/news');
+		
+		chat.on('connect', function() {
+			chat.emit('hi!!');
+		});
+		
+		news.on('news', function() {
+			news.emit('woot');
+		});
+		
+	</script>

@@ -1,0 +1,184 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+	<title>eBoard</title>
+	<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script src="js/board.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<!-- Must type the Personal API Key for daum map openAPI -->
+	<script type="text/javascript" src="//apis.daum.net/maps/maps3.js?apikey=PersonalAPIKEY"></script>
+	<link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+	<script>
+		var ctx;
+		var drawing = false;
+		$(document).ready(function() {
+			// Using jQuery, get canvas element 
+			ctx = $('#cv').get(0).getContext('2d');
+			
+			$('#cv').bind('mousedown', draw.start);
+			$('#cv').bind('mousemove', draw.move);
+			$('#cv').bind('mouseup', draw.end);
+			
+			// mouseover-mouseout / mouseenter-mouseleave
+			// http://stackoverflow.com/questions/7286532/jquery-mouseenter-vs-mouseover 
+			$('#cv').bind('mouseleave', draw.end);
+			
+			//register clear handler
+			$('#clear').bind('click', draw.clear);
+			
+			$('select').bind('change', shape.change);
+			
+			for(var key in color_map) {
+				$('#pen_color').append('<option value=' + color_map[key].value + '>' + color_map[key].name + '</option>');
+			};
+			
+			for(var i=0;i<16; i++) {
+				$('#pen_thickness').append('<option value='+i+'>' +i +'</option>');
+			};
+			
+			shape.change();
+			
+			socket = io.connect('http://' + window.location.host);
+			socket.on('linesend_toclient', function (data) {
+				draw.drawfromServer(data);
+			});
+			
+			$('#btn_map').bind('click', mapObj.init);
+			$('#btn_map_close').bind('click', mapObj.close);
+			
+			socket.on('map_toclient', function(data) {
+				mapObj.drawfromServer(data);
+			});
+			
+			$('#btn_roadview, #btn_roadview_close').hide();
+			$('#btn_roadview').bind('click', mapObj.roadview);
+			$('#btn_roadview_close').bind('click', mapObj.roadviewClose);
+		});
+		
+		// Line - color, thickness	
+		var shape = {
+			color : 'white',
+			thickness : 3,
+			change : function() {
+				var color = $('#pen_color').val();
+				var thickness = $('#pen_thickness').val();
+				
+				shape.setShape(color, thickness);
+			},
+			setShape : function(color, thickness) {
+				if (null != color)
+					this.color = color;
+					
+				if (null != thickness)
+					this.thickness = thickness;
+				
+				ctx.strokeStyle = this.color;
+				ctx.lineWidth = this.thickness;
+				
+				// swipe pen_shape 
+				ctx.clearRect(703, 0, 860,90);
+				
+				// pen_shape sample
+				ctx.beginPath();
+				ctx.moveTo(710,55);
+				ctx.lineTo(820,55);
+				ctx.stroke();
+			}
+		}
+		
+		var draw = {
+			
+			start : function(e) {
+				if (false == drawing) {
+					ctx.beginPath();
+					ctx.moveTo(e.pageX, e.pageY);
+					drawing = true;
+					console.log("draw start " + e.pageX + " " + e.pageY);
+					
+					msg.line.send('start', e.pageX, e.pageY);
+				}
+			},
+			
+			move : function(e) {
+				if (true == drawing) {
+					ctx.lineTo(e.pageX, e.pageY);
+					ctx.stroke();
+					console.log("draw move " + e.pageX + " " + e.pageY);
+					
+					msg.line.send('move', e.pageX, e.pageY);
+				}
+			},
+			
+			end : function(e) {
+				if (true == drawing) {
+					drawing = false;
+					console.log("draw end " + e.pageX + " " + e.pageY);
+					
+					msg.line.send('end');
+				}
+			},
+			
+			clear : function() {
+				ctx.clearRect(0, 0, cv.width, cv.height);
+				shape.change();
+				msg.line.send('clear');
+			},
+			
+			drawfromServer : function (data) {
+				if (data.type == 'start') {
+					ctx.beginPath();
+					ctx.moveTo(data.x, data.y);
+					ctx.strokeStyle = data.color;
+					ctx.lineWidth = data.width;
+				}
+				
+				if (data.type == 'move') {
+					ctx.lineTo(data.x, data.y);
+					ctx.stroke();
+				}
+				
+				if (data.type == 'end') {
+					shape.change();
+				}
+				
+				if (data.type == 'clear') {
+					ctx.clearRect(0, 0, cv.width, cv.height);
+					shape.change();
+				}
+			}
+		}
+		
+		var msg = {
+			line : {
+				send : function(type, x, y) {
+					console.log('line.send' + type + x + y);
+					socket.emit('linesend', {'type':type, 'x':x, 'y':y, 'color':shape.color, 'width':shape.width});
+				}
+			}
+		};
+	</script>
+</head>
+<body>
+<canvas id="cv" width=860 height=645></canvas>
+<div id="map" style="position:absolute;top:100;left:100;width:600px;height:400px;display:none;"></div>
+<div id="roadview" style="position:absolute;top:100;left:100;width:600px;height:400px;display:none;"></div>
+<div class="menu">
+	<button id="clear">clear</button>
+	<fieldset>
+		<legend>Colors</legend>
+		<select id='pen_color'></select>
+	</fieldset>
+	<fieldset>
+		<legend>Thickness</legend>
+		<select id='pen_thickness'></select>
+	</fieldset>
+	<fieldset id='pen_shape'>
+		<legend>Shape</legend>
+	</fieldset>
+	<button id="btn_map">Open the Map</button>
+	<button id="btn_map_close">Close the Map</button>
+	<button id="btn_roadview">Open the RoadView Map</button>
+	<button id="btn_roadview_close">Close the RoadView Map</button>
+</div>
+</body>
+</html>
