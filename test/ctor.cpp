@@ -1,4 +1,14 @@
 #include <iostream>
+#include <exception>
+
+
+class test
+{
+public:
+    test() { std::cout << "test::test()" << std::endl; }
+    virtual ~test() { std::cout << "test::~test()" << std::endl; }
+};
+
 
 class Base
 {
@@ -10,21 +20,20 @@ public:
 class Derived : public Base
 {
 public:
-    Derived() : Base() { throw; std::cout << "Derived::Derived()" << std::endl; }
+    Derived() : Base(), t(new test()){ throw std::exception(); std::cout << "Derived::Derived()" << std::endl; }
     virtual ~Derived() { std::cout << "Derived::~Derived()" << std::endl; }
+private:
+    std::shared_ptr<test> t;
 };
-
-class test
-{
-public:
-    test() { std::cout << "test::test()" << std::endl; }
-    virtual ~test() { std::cout << "test::~test()" << std::endl; }
-};
-
 int main()
 {
+    try
     {
         Derived d;
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
     }
     return 0;
 }
