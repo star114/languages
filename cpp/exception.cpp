@@ -1,24 +1,22 @@
 #include <iostream>
 
 using namespace std;
-class data
-{
+class data {
 public:
-    data(){ cout << "data ()" << endl; }
+    data() { cout << "data ()" << endl; }
     ~data() { cout << "~data ()" << endl; }
 };
 
-class test
-{
+class test {
 public:
     test()
-    : d(new data())
+        : d(new data())
     {
-        cout << "test()" <<endl;
+        cout << "test()" << endl;
         throw "??";
     }
     ~test()
-    { 
+    {
         delete d;
         cout << "~test()" << endl;
     }
@@ -27,14 +25,11 @@ public:
 
 int main()
 {
-    try
-    {
+    try {
         cout << "start program" << endl;
         test a;
         cout << "succeed." << endl;
-    }
-    catch(...)
-    {
+    } catch (...) {
         cout << "catched" << endl;
     }
     return 0;

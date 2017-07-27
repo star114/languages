@@ -1,8 +1,7 @@
 #include <iostream>
 
 using namespace std;
-class Base
-{
+class Base {
 public:
     Base() { cout << "Base()" << endl; }
     virtual ~Base() { cout << "~Base()" << endl; }
@@ -14,10 +13,13 @@ public:
     }
 };
 
-class Derived : public Base
-{
+class Derived : public Base {
 public:
-    Derived() : Base() { cout << "Derived()" << endl; }
+    Derived()
+        : Base()
+    {
+        cout << "Derived()" << endl;
+    }
     virtual ~Derived() { cout << "~Derived()" << endl; }
     void InnerFunc() { cout << "Derived::InnerFunc()" << endl; }
     void outerFunc() { Base::outerFunc(); }

@@ -8,8 +8,7 @@ int main()
     vi.emplace_back(2);
     vi.emplace_back(3);
 
-    for (auto entry : vi)
-    {
+    for (auto entry : vi) {
         std::cout << entry << std::endl;
     }
 

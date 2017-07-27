@@ -1,18 +1,20 @@
 #include <iostream>
 
-class Base
-{
+class Base {
 public:
-    Base(){std::cout << "Base()" << std::endl;}
+    Base() { std::cout << "Base()" << std::endl; }
     virtual ~Base() { std::cout << "~Base()" << std::endl; }
     virtual void Func() { std::cout << "Base::Func()" << std::endl; }
 };
 
-class Derived : public Base
-{
+class Derived : public Base {
 public:
-    Derived() : Base() {std::cout << "Derived()" << std::endl;}
-    ~Derived() override final { std::cout << "~Derived()" << std::endl;}
+    Derived()
+        : Base()
+    {
+        std::cout << "Derived()" << std::endl;
+    }
+    ~Derived() override final { std::cout << "~Derived()" << std::endl; }
     void Func() override final { std::cout << "Derived::Func()" << std::endl; }
 };
 

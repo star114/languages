@@ -1,5 +1,4 @@
 
-namespace test
-{
-    void func();
+namespace test {
+void func();
 } // namespace test

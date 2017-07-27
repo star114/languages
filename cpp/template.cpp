@@ -1,10 +1,9 @@
 #include <iostream>
 
-template<typename T>
+template <typename T>
 void foo(T& x)
 {
 }
-
 
 int main()
 {
@@ -14,5 +13,4 @@ int main()
     foo(cx);
     int const& rx = &x;
     foo(rx);
-
 }

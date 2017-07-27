@@ -1,14 +1,12 @@
 #include <iostream>
 
-struct A
-{
-   bool a : 1;
-   int b : 1;
-   bool c : 1;
+struct A {
+    bool a : 1;
+    int b : 1;
+    bool c : 1;
 };
 
-struct B
-{
+struct B {
     bool a;
     int b;
     bool c;
