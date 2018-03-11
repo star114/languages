@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  mutex.cpp
- *
- *    Description:  mutex sample
- *
- *        Version:  1.0
- *        Created:  08/12/15 22:22:30
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Heesik Shin (star114), star114.shin@gmail.com
- *   Organization:  
- *
- * =====================================================================================
- */
 #include <iostream>
 #include <mutex>
 #include <stdlib.h>

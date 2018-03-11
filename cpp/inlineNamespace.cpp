@@ -10,7 +10,7 @@ void f()
 }
 }
 
-inline
+//inline
 namespace b {
 void f()
 {

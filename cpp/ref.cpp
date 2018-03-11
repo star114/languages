@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  ref.cpp
- *
- *    Description:  std::ref, std::bind example
- *
- *        Version:  1.0
- *        Created:  08/12/15 21:57:34
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Heesik Shin (star114), star114.shin@gmail.com
- *   Organization:  
- *
- * =====================================================================================
- */
 #include <functional>
 #include <iostream>
 #include <stdlib.h>

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <typeinfo>
 
 static int test = 0;
 class A {
@@ -67,6 +68,7 @@ private:
 
 B print(B&& b)
 {
+    std::cout << typeid(b).name() << std::endl;
     b.print();
     B b2(2);
     return b2;
@@ -76,11 +78,33 @@ int main()
 {
     {
         B b(B(1));
-        //B b(std::move(B(1)));
+        // 1
+        b.print();
 
-        //print(std::move(b));
-        //b.print();
+        B b2(std::move(B(10)));
+        // 10
+        b2.print();
+
+        // 1
+        auto b3 = print(std::move(b));
+        // 2
+        b3.print();
+        // std::move is just type casting function, don't move anything inside.
+        // so we can call b.print() since print function doesn't move b.
+        // 1
+        b.print();
+
+        // 100
+        auto b4 = print(std::move(B(100)));
+        // 2
+        b4.print();
+
+        // print function should get && (rvalue) reference only.
+        //auto b5 = print(b);
+        //b5.print();
+
     }
-    std::cout << test << std::endl;
+
+    std::cout << "A::~A() is called in " << test << " times." << std::endl;
     return 0;
 }

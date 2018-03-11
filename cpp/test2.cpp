@@ -20,6 +20,7 @@ int main()
         base* b = nullptr;
         //divide by zero
         std::cout << 1.0 / 0.0 << std::endl;
+        std::cout << 1 / 0 << std::endl;
         //    b->test();
         std::cout << "!" << std::endl;
         throw 1;

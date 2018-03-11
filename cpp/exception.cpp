@@ -13,13 +13,15 @@ public:
         : d(new data())
     {
         cout << "test()" << endl;
-        throw "??";
+        throw "exception";
     }
     ~test()
     {
         delete d;
         cout << "~test()" << endl;
     }
+    // memory leakage
+    // Please use smart pointers
     data* d;
 };
 
