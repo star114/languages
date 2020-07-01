@@ -2,3 +2,6 @@
 	path = Android
 	url = https://github.com/star114/Android.git
     ignore = all
+[submodule "GoInAction"]
+	path = GoInAction
+	url = https://github.com/star114/GoInAction.git
